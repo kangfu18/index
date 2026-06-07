@@ -6,58 +6,234 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
 
   <style>
-    body { background-color: #0f172a; color: #f8fafc; font-family: 'Prompt', sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; overflow: hidden; }
-    .screen-container { width: 100%; max-width: 750px; padding: 20px; text-center; }
-    .display-card { background: radial-gradient(circle at top left, #1e293b, #0f172a); border-radius: 30px; border: 3px solid #3b82f6; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); padding: 40px; text-align: center; transition: all 0.3s ease; }
-    .welcome-card { border-color: #10b981; background: radial-gradient(circle at top left, #111827, #0f172a); }
-    .qr-holder { background: white; padding: 20px; border-radius: 20px; display: inline-block; box-shadow: 0 10px 25px rgba(0,0,0,0.3); margin: 25px 0; }
-    .qr-holder img { width: 240px; height: auto; }
-    .price-text { font-size: 4.5rem; font-weight: 800; color: #f43f5e; text-shadow: 0 0 20px rgba(244,63,94,0.3); margin: 15px 0; }
-    .station-title { font-size: 2.2rem; font-weight: 800; color: #3b82f6; }
-    .logo-big { font-size: 3.5rem; font-weight: 800; color: #10b981; letter-spacing: 2px; text-shadow: 0 0 15px rgba(16,185,129,0.4); animation: pulse 2s infinite; }
-    @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.03); } }
+    :root {
+      --bg-dark: #0f172a;
+      --card-bg: #1e293b;
+      --primary-neon: #3b82f6;
+      --accent-neon: #f43f5e;
+      --success-neon: #10b981;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+
+    body { 
+      background-color: var(--bg-dark); 
+      color: var(--text-main); 
+      font-family: 'Prompt', sans-serif; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      min-height: 100vh; 
+      margin: 0; 
+      overflow-x: hidden;
+    }
+
+    /* พื้นหลังแบบเคลื่อนไหวเบาๆ เพิ่มความหรูหรา */
+    body::before {
+      content: "";
+      position: absolute;
+      top: -50%; left: -50%; width: 200%; height: 200%;
+      background: radial-gradient(circle at 30% 30%, rgba(59, 130, 246, 0.08), transparent 40%),
+                  radial-gradient(circle at 70% 70%, rgba(244, 63, 94, 0.06), transparent 45%);
+      z-index: -1;
+      animation: ambientBg 20s linear infinite;
+    }
+    @keyframes ambientBg {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .screen-container { width: 100%; max-width: 900px; padding: 25px; }
+    
+    /* การออกแบบการ์ดหลักสไตล์โมเดิร์นคาสิโน/อีสปอร์ต */
+    .display-card { 
+      background: rgba(30, 41, 59, 0.75); 
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-radius: 32px; 
+      border: 1px solid rgba(255, 255, 255, 0.08); 
+      box-shadow: 0 30px 60px -15px rgba(0,0,0,0.6); 
+      padding: 50px 40px; 
+      text-align: center; 
+    }
+    
+    /* หน้าจอสแตนด์บาย (Welcome Screen) */
+    .welcome-card { 
+      border: 2px solid var(--success-neon);
+      box-shadow: 0 0 40px rgba(16, 185, 129, 0.15);
+    }
+    .logo-big { 
+      font-size: 3.8rem; 
+      font-weight: 800; 
+      color: var(--success-neon); 
+      letter-spacing: 2px; 
+      text-shadow: 0 0 25px rgba(16,185,129,0.5); 
+      animation: heartbeat 2.5s infinite ease-in-out; 
+    }
+    @keyframes heartbeat {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.04); text-shadow: 0 0 35px rgba(16,185,129,0.7); }
+    }
+
+    /* กล่องครอบ QR Code พร้อมเอฟเฟกต์เส้นแสงวิ่งรอบทิศทาง */
+    .qr-border-glow {
+      position: relative;
+      display: inline-block;
+      padding: 4px;
+      border-radius: 24px;
+      background: linear-gradient(135deg, var(--primary-neon), var(--accent-neon));
+      background-size: 300% 300%;
+      animation: gradientMove 4s ease infinite;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+      margin: 20px 0;
+    }
+    @keyframes gradientMove {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    .qr-holder { 
+      background: #ffffff; 
+      padding: 18px; 
+      border-radius: 20px; 
+      display: inline-block; 
+    }
+    .qr-holder img { width: 230px; height: 230px; display: block; }
+
+    /* การจัดแจงรายละเอียดบิลแบบตารางของระบบใหญ่ */
+    .bill-details-box {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 20px;
+      padding: 20px 25px;
+      margin-bottom: 25px;
+      text-align: left;
+    }
+    .detail-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      font-size: 1.1rem;
+    }
+    .detail-row:last-child { border-bottom: none; }
+    .detail-label { color: var(--text-muted); font-weight: 400; }
+    .detail-value { color: var(--text-main); font-weight: 600; }
+
+    /* ยอดเงินสุทธิตัวเบิ้มๆ สะดุดตา */
+    .price-container {
+      background: linear-gradient(to right, rgba(244,63,94,0.1), rgba(244,63,94,0.02));
+      border-left: 5px solid var(--accent-neon);
+      padding: 15px 25px;
+      border-radius: 0 16px 16px 0;
+      margin: 25px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .price-label { font-size: 1.4rem; font-weight: 700; color: #fda4af; }
+    .price-text { 
+      font-size: 3.8rem; 
+      font-weight: 800; 
+      color: var(--accent-neon); 
+      text-shadow: 0 0 25px rgba(244,63,94,0.4); 
+      line-height: 1;
+    }
+
+    .station-badge {
+      background: linear-gradient(135deg, #1e40af, #1e3a8a);
+      color: #93c5fd;
+      padding: 6px 18px;
+      border-radius: 50px;
+      font-weight: 700;
+      font-size: 1.1rem;
+      display: inline-block;
+      border: 1px solid #3b82f6;
+      box-shadow: 0 4px 10px rgba(59,130,246,0.2);
+    }
+    .footer-tips {
+      font-size: 1.1rem;
+      color: var(--success-neon);
+      font-weight: 600;
+      animation: pulseText 2s infinite;
+    }
+    @keyframes pulseText {
+      0%, 100% { opacity: 0.8; }
+      50% { opacity: 1; text-shadow: 0 0 10px rgba(16,185,129,0.3); }
+    }
   </style>
 </head>
 <body>
 
   <div class="screen-container">
-    <!-- 1. หน้าจอสแตนด์บายปกติ (Welcome Screen) -->
-    <div id="welcome-view" class="display-card welcome-card">
+    <div id="welcome-view" class="display-card welcome-card animate__animated animate__fadeIn">
       <div class="logo-big mb-3">🎮 YALA PLAYSTATION</div>
-      <h2 class="fw-bold text-white">ยินดีต้อนรับสู่ร้านเกมของเรา</h2>
-      <p class="text-muted fs-5 mt-3">ขอให้สนุกกับการเล่นเกมส์ครับ ขอบคุณที่ใช้บริการครับ 😊</p>
+      <h1 class="fw-bold text-white mb-2" style="font-size: 2.5rem;">ยินดีต้อนรับสู่สเตชั่นความสนุก</h1>
+      <p class="text-muted fs-5 mt-3">ขอให้สนุกเต็มอิ่มกับการเล่นเกมส์ครับ เมื่อใช้บริการเสร็จแจ้งแอดมินเช็คบิลได้เลยครับน้า 😊</p>
     </div>
 
-    <!-- 2. หน้าจอแสดงบิลชำระเงินพร้อมเพย์ (Checkout Screen) -->
-    <div id="checkout-view" class="display-card" style="display: none;">
-      <h3 class="text-white-50 fw-bold mb-1">🧾 ยอดสรุปค่าบริการ</h3>
-      <div id="cusStation" class="station-title">-</div>
-      <div id="cusName" class="text-warning fw-bold fs-4 mb-2">คุณ: -</div>
-      
-      <div class="qr-holder">
-        <div id="customerQRTarget"></div>
+    <div id="checkout-view" class="display-card animate__animated animate__fadeIn" style="display: none;">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div id="cusStation" class="station-badge">🎮 -</div>
+        <div class="text-white-50 fw-bold fs-5">🧾 ใบแจ้งยอดค่าบริการส่งตรงจากระบบแอดมิน</div>
       </div>
-      
-      <div class="text-muted small">สแกนจ่ายง่ายๆ ผ่าน App ธนาคารได้ทุกแอป</div>
-      <div id="cusAmount" class="price-text">0.00 บาท</div>
-      <h5 class="text-success fw-bold">📱 เมื่อชำระเงินเรียบร้อยแล้ว แจ้งแอดมินได้เลยครับ</h5>
+
+      <div class="row align-items-center">
+        <div class="col-md-6">
+          <div class="bill-details-box">
+            <div class="detail-row">
+              <span class="detail-label">👤 ชื่อผู้ใช้บริการ</span>
+              <span id="cusName" class="detail-value text-warning">-</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">⏳ เวลาเปิดสเตชั่นหลัก</span>
+              <span id="cusBaseHrs" class="detail-value">- ชม.</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">⏱️ เวลาที่ขอต่อเพิ่ม</span>
+              <span id="cusExtHrs" class="detail-value text-success">- ชม.</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">🍿 ค่าอาหาร / ขนมสะสม</span>
+              <span id="cusFood" class="detail-value text-info">- บาท</span>
+            </div>
+          </div>
+
+          <div class="price-container">
+            <span class="price-label">ยอดที่ต้องชำระสุทธิ</span>
+            <div id="cusAmount" class="price-text">0.00 บ.</div>
+          </div>
+        </div>
+
+        <div class="col-md-6 text-center">
+          <div class="qr-border-glow">
+            <div class="qr-holder">
+              <div id="customerQRTarget"></div>
+            </div>
+          </div>
+          <p class="text-muted small mt-1">📱 รองรับการสแกนจ่ายผ่าน App ธนาคารทุกประเภท</p>
+          <div class="footer-tips mt-3">✅ เมื่อโอนสำเร็จ ยอดหน้าจอนี้จะปิดออโต้ทันทีครับ</div>
+        </div>
+      </div>
     </div>
   </div>
 
   <script>
-    const PROMPTPAY_ID = '0980597696'; // 💡 แก้เป็นเบอร์พร้อมเพย์ร้านคุณให้ตรงกับเครื่องหลัก
+    const PROMPTPAY_ID = '0980597696'; 
     const SUPABASE_URL = 'https://cqhtdhdbbprptotcxevo.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNxaHRkaGRiYnBycHRvdGN4ZXZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2NjI3MDgsImV4cCI6MjA5NjIzODcwOH0.8rRvayE0qhqRxYHNHnG3_bI9KTqxWUBjbCMpKTdTnY4';
     
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    // --- ฟังก์ชันสูตรคณิตศาสตร์สำหรับสร้าง PromptPay QR เหมือนหน้าจอแอดมิน ---
+    // ฟังก์ชันคำนวณโครงสร้างลวดลายข้อมูลพร้อมเพย์สากล
     function generatePromptPayPayload(targetId, amount) {
       let target = targetId.replace(/[- ]/g, '');
       let type = target.length >= 13 ? '03' : '01'; 
@@ -83,41 +259,61 @@
       return ('0000' + (crc & 0xFFFF).toString(16).toUpperCase()).slice(-4);
     }
 
-    // --- ฟังก์ชันดึงและอัปเดตหน้าจอแปรผันตาม Supabase ---
     async function listenToCustomerDisplay() {
-      // ดึงข้อมูลครั้งแรกมาแสดงผลก่อน
+      // โหลดสถานะล่าสุดเมื่อเปิดเบราว์เซอร์
       const { data } = await supabaseClient.from('customer_display').select('*').eq('id', 'current_checkout').single();
-      if(data) {
-        renderCustomerView(data);
-      }
+      if(data) { fetchAndRenderDetails(data); }
 
-      // เปิดระบบท่อส่งข้อมูลดิ่งตรง (Realtime Subscription) ตรวจจับเมื่อแอดมินกดเช็คบิล
+      // เชื่อมต่อระบบเรียลไทม์เฝ้าดูความเปลี่ยนแปลง
       supabaseClient
         .channel('customer_changes')
         .on('postgres_changes', { event: 'UPDATE', filter: "id=eq.current_checkout", schema: 'public', table: 'customer_display' }, payload => {
-          renderCustomerView(payload.new);
+          fetchAndRenderDetails(payload.new);
         })
         .subscribe();
     }
 
-    function renderCustomerView(data) {
+    // ฟังก์ชันไปดึงประวัติการเล่นจริงจากตารางหลักมาแสดงแจกแจงผล
+    async function fetchAndRenderDetails(displayData) {
       const welcomeView = document.getElementById('welcome-view');
       const checkoutView = document.getElementById('checkout-view');
 
-      if (data.show_checkout && data.amount > 0) {
-        document.getElementById('cusStation').innerText = `🎮 ${data.zone} - เครื่อง ${data.machine_number}`;
-        document.getElementById('cusName').innerText = `คุณ: ${data.customer_name || 'ลูกค้าทั่วไป'}`;
-        document.getElementById('cusAmount').innerText = `${parseFloat(data.amount).toFixed(2)} บาท`;
+      if (displayData.show_checkout && displayData.amount > 0) {
+        // ดึงข้อมูลเสริมจากตารางเครื่องหลักมาแตกรายละเอียดบิลให้ลูกค้าดู
+        const { data: machine } = await supabaseClient
+          .from('machines')
+          .select('base_hours, extended_hours, food_revenue')
+          .eq('zone', displayData.zone)
+          .eq('machine_number', displayData.machine_number)
+          .single();
 
-        // เจนเนอเรตคิวอาร์โค้ดล็อกยอดเงินตรงนี้
-        let pCode = generatePromptPayPayload(PROMPTPAY_ID, parseFloat(data.amount));
+        // กรอกข้อมูลลงหน้าดีไซน์พรีเมียม
+        document.getElementById('cusStation').innerText = `🎮 ${displayData.zone} - เครื่องที่ ${displayData.machine_number}`;
+        document.getElementById('cusName').innerText = displayData.customer_name || 'ลูกค้าทั่วไป';
+        document.getElementById('cusAmount').innerText = `${parseFloat(displayData.amount).toFixed(2)} บ.`;
+        
+        if (machine) {
+          document.getElementById('cusBaseHrs').innerText = `${machine.base_hours || 0} ชั่วโมง`;
+          document.getElementById('cusExtHrs').innerText = machine.extended_hours > 0 ? `${machine.extended_hours} ชั่วโมง` : 'ไม่มีการต่อเวลา';
+          document.getElementById('cusFood').innerText = `${machine.food_revenue || 0} บาท`;
+        } else {
+          document.getElementById('cusBaseHrs').innerText = '-';
+          document.getElementById('cusExtHrs').innerText = '-';
+          document.getElementById('cusFood').innerText = '-';
+        }
+
+        // ยิงคำสั่งสร้างคิวอาร์โค้ดลงจอขวา
+        let pCode = generatePromptPayPayload(PROMPTPAY_ID, parseFloat(displayData.amount));
         let qr = qrcode(0, 'M');
         qr.addData(pCode);
         qr.make();
         document.getElementById('customerQRTarget').innerHTML = qr.createImgTag(5);
 
-        welcomeView.style.display = 'none';
-        checkoutView.style.display = 'block';
+        // สั่งสลับแอนิเมชั่นเปลี่ยนหน้า
+        if(welcomeView.style.display !== 'none') {
+          welcomeView.style.display = 'none';
+          checkoutView.style.display = 'block';
+        }
       } else {
         welcomeView.style.display = 'block';
         checkoutView.style.display = 'none';
