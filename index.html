@@ -60,7 +60,6 @@
       position: relative;
     }
 
-    /* จัดแต่งโลโก้ร้าน */
     .logo-welcome {
       width: 180px;
       height: auto;
@@ -223,6 +222,7 @@
     };
 
     async function initCustomerRealtime() {
+      // ดึงสถานะปัจจุบันรอบแรกมาโชว์ก่อน
       let { data } = await supabaseClient
         .from('customer_display')
         .select('*')
@@ -231,10 +231,13 @@
       
       if (data) { renderCustomerView(data); }
 
+      // 🛠️ แก้ไขกลับมาใช้ตัวสตรีมแบบ Global ดักจับกว้างๆ ชัวร์กว่าเดิม 100% ลื่นไหลเหมือนตัวแรกครับน้า
       supabaseClient
-        .channel('customer_neon_stream')
-        .on('postgres_changes', { event: 'UPDATE', filter: "id=eq.current_checkout", schema: 'public', table: 'customer_display' }, payload => {
-          renderCustomerView(payload.new);
+        .channel('customer_global_stream')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'customer_display' }, payload => {
+          if (payload.new && payload.new.id === 'current_checkout') {
+            renderCustomerView(payload.new);
+          }
         })
         .subscribe();
     }
