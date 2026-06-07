@@ -2,130 +2,145 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8">
-  <title>YALA PLAYSTATION - จอแสดงผลลูกค้า 📺</title>
+  <title>YALA PLAYSTATION - CUSTOMER DISPLAY</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
 
   <style>
     :root {
-      --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
-      --primary-cyan: #06b6d4;
-      --primary-pink: #f43f5e;
-      --success-green: #10b981;
-      --glass-bg: rgba(30, 41, 59, 0.7);
-      --glass-border: rgba(255, 255, 255, 0.08);
+      --cyber-bg: #0b0f19;
+      --panel-bg: linear-gradient(145deg, #131b2e 0%, #0d1322 100%);
+      --neon-blue: #00f0ff;
+      --neon-pink: #ff007f;
+      --neon-green: #39ff14;
+      --text-main: #f1f5f9;
     }
 
     body { 
-      background: var(--bg-gradient); 
-      color: #f8fafc; 
+      background-color: var(--cyber-bg); 
+      color: var(--text-main); 
       font-family: 'Prompt', sans-serif; 
       display: flex; 
       align-items: center; 
       justify-content: center; 
       min-height: 100vh; 
-      margin: 0; 
-      overflow: hidden;
+      margin: 0;
+      background-image: radial-gradient(circle at 50% 10%, #1e1b4b 0%, var(--cyber-bg) 70%);
     }
 
-    /* แอนิเมชันเปิดหน้าจอ */
-    @keyframes fadeInScale {
-      0% { opacity: 0; transform: scale(0.95); filter: blur(5px); }
-      100% { opacity: 1; transform: scale(1); filter: blur(0); }
+    /* Animation ค่อยๆ เด้งแผงควบคุมขึ้นมาสวยๆ */
+    @keyframes slideUpGlow {
+      0% { opacity: 0; transform: translateY(30px) scale(0.98); filter: drop-shadow(0 0 0px rgba(0,0,0,0)); }
+      100% { opacity: 1; transform: translateY(0) scale(1); filter: drop-shadow(0 20px 50px rgba(0, 240, 255, 0.15)); }
     }
 
-    @keyframes pulseGlow {
-      0% { box-shadow: 0 0 20px rgba(6, 182, 212, 0.2); }
-      50% { box-shadow: 0 0 40px rgba(6, 182, 212, 0.4); }
-      100% { box-shadow: 0 0 20px rgba(6, 182, 212, 0.2); }
+    @keyframes pulseNeon {
+      0%, 100% { box-shadow: 0 0 15px rgba(0, 240, 255, 0.3), inset 0 0 15px rgba(0, 240, 255, 0.1); }
+      50% { box-shadow: 0 0 30px rgba(0, 240, 255, 0.6), inset 0 0 25px rgba(0, 240, 255, 0.2); }
     }
 
     .screen-container { 
       width: 100%; 
-      max-width: 850px; 
-      padding: 25px; 
-      animation: fadeInScale 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+      max-width: 680px; 
+      padding: 15px; 
+      animation: slideUpGlow 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
 
     .card-display { 
-      background: var(--glass-bg); 
-      border: 2px solid var(--glass-border); 
-      border-radius: 36px; 
-      box-shadow: 0 30px 60px rgba(0,0,0,0.6); 
-      padding: 45px; 
-      backdrop-filter: blur(16px);
+      background: var(--panel-bg); 
+      border: 2px solid #1e293b;
+      border-top: 3px solid var(--neon-blue);
+      border-radius: 32px; 
+      padding: 35px; 
+      text-align: center;
       position: relative;
     }
 
+    .brand-logo-zone {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
     .brand-title { 
-      font-size: 3rem; 
-      font-weight: 800; 
-      background: linear-gradient(to right, #3b82f6, #8b5cf6, #ec4899);
+      font-size: 2.5rem; 
+      font-weight: 900; 
+      letter-spacing: 2px;
+      background: linear-gradient(135deg, #fff 30%, var(--neon-blue));
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      text-transform: uppercase; 
-      letter-spacing: 3px; 
-      filter: drop-shadow(0 2px 10px rgba(139, 92, 246, 0.3));
+      text-shadow: 0 0 15px rgba(0,240,255,0.2);
     }
 
     .station-badge { 
-      background: linear-gradient(135deg, var(--primary-pink) 0%, #be123c 100%); 
-      padding: 14px 40px; 
-      border-radius: 50px; 
-      font-size: 1.8rem; 
-      font-weight: 800; 
-      display: inline-block; 
-      box-shadow: 0 8px 25px rgba(244, 63, 94, 0.4);
-      letter-spacing: 1px;
+      background: linear-gradient(90deg, var(--neon-pink) 0%, #bd005f 100%); 
+      padding: 8px 30px; 
+      border-radius: 12px; 
+      font-size: 1.4rem; 
+      font-weight: 700; 
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 0 20px rgba(255, 0, 127, 0.4);
+      border: 1px solid rgba(255,255,255,0.2);
     }
 
-    .price-text { 
-      font-size: 4.8rem; 
-      font-weight: 800; 
-      color: var(--success-green); 
-      text-shadow: 0 0 30px rgba(16,185,129,0.5); 
-      margin: 10px 0;
-    }
-
-    .qr-holder { 
-      background: #ffffff; 
-      padding: 18px; 
-      border-radius: 28px; 
-      display: inline-block; 
-      animation: pulseGlow 3s infinite ease-in-out;
-      border: 4px solid var(--primary-cyan);
-      transition: transform 0.3s ease;
-    }
-    .qr-holder:hover { transform: scale(1.03); }
-    .qr-holder img { width: 230px; height: 230px; }
-
-    .welcome-text { 
-      font-size: 3.8rem; 
-      font-weight: 800; 
-      color: #f59e0b; 
-      text-shadow: 0 0 25px rgba(245,158,11,0.4); 
-    }
-    
-    /* กล่องรายละเอียดดีดตัวสไตล์โมเดิร์น */
-    .detail-card {
-      background: rgba(15, 23, 42, 0.5);
-      border: 1px solid var(--glass-border);
+    /* ตารางแสดงข้อมูลรายละเอียดดีไซน์ใหม่สไตล์เครื่องเกมส์ */
+    .info-matrix {
+      background: rgba(13, 19, 35, 0.8);
+      border: 1px solid #1e293b;
       border-radius: 20px;
-      padding: 20px;
-      margin-bottom: 25px;
+      padding: 22px;
+      margin: 25px 0;
     }
-    .detail-item {
-      padding: 8px 0;
-      border-bottom: 1px solid rgba(255,255,255,0.05);
+
+    .matrix-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 5px;
+      border-bottom: 1px dashed rgba(255, 255, 255, 0.06);
     }
-    .detail-item:last-child { border-bottom: none; }
-    .detail-label { color: #94a3b8; font-size: 1.05rem; font-weight: 400; }
-    .detail-value { color: #ffffff; font-size: 1.25rem; font-weight: 600; }
+    .matrix-row:last-child { border-bottom: none; }
+    
+    .matrix-label { color: #64748b; font-size: 1rem; font-weight: 500; display: flex; align-items: center; gap: 8px; }
+    .matrix-value { color: #f8fafc; font-size: 1.15rem; font-weight: 600; }
+    
+    /* เน้นจุดสำคัญด้วยสีนีออน */
+    .color-blue { color: var(--neon-blue) !important; text-shadow: 0 0 10px rgba(0,240,255,0.3); }
+    .color-pink { color: var(--neon-pink) !important; text-shadow: 0 0 10px rgba(255,0,127,0.3); }
+    .color-green { color: var(--neon-green) !important; text-shadow: 0 0 10px rgba(57,255,20,0.3); }
+
+    .total-title { font-size: 1.1rem; color: #94a3b8; font-weight: 500; letter-spacing: 1px; }
+    
+    .price-text { 
+      font-size: 4.5rem; 
+      font-weight: 900; 
+      color: var(--neon-green); 
+      text-shadow: 0 0 30px rgba(57,255,20,0.4); 
+      margin: 5px 0 20px 0;
+      font-family: monospace, 'Prompt';
+    }
+
+    .qr-container-box {
+      background: #ffffff;
+      padding: 14px;
+      border-radius: 24px;
+      display: inline-block;
+      animation: pulseNeon 3.5s infinite ease-in-out;
+      border: 2px solid var(--neon-blue);
+    }
+    .qr-container-box img { width: 210px; height: 210px; display: block; }
+
+    .welcome-screen { padding: 60px 0; }
+    .welcome-pulse { font-size: 3.5rem; font-weight: 800; color: #f59e0b; text-shadow: 0 0 25px rgba(245,158,11,0.4); }
   </style>
 </head>
 <body>
@@ -133,54 +148,56 @@
   <div class="screen-container">
     <div class="card-display">
       
-      <!-- 1. หน้าจอตอน Standby -->
-      <div id="welcome-view" style="display: block; padding: 50px 0;">
+      <!-- หน้าจอสแตนบาย -->
+      <div id="welcome-view" class="welcome-screen" style="display: block;">
         <div class="brand-title mb-2">🎮 YALA PLAYSTATION</div>
-        <div class="welcome-text my-4">ยินดีต้อนรับครับ</div>
-        <div class="sub-welcome text-muted fs-5">กรุณาแจ้งเปิดเครื่อง หรือสั่งอาหารกับแอดมินได้เลยครับ 😊</div>
+        <div class="welcome-pulse my-4">WELCOME</div>
+        <div class="text-muted fs-5">แจ้งเปิดเครื่องเล่นหรือสั่งเมนูอาหารกับแอดมินได้เลยครับ</div>
       </div>
 
-      <!-- 2. หน้าจอแสดงสแกนจ่ายเงิน (เวอร์ชันอัปเกรดรายละเอียดครบถ้วน) -->
+      <!-- หน้าจอจ่ายเงินเวอร์ชันแก้ใหม่ สวยเฉียบ รายละเอียดครบครัน -->
       <div id="checkout-view" style="display: none;">
-        <div class="brand-title mb-4">🎮 YALA PLAYSTATION</div>
+        <div class="brand-logo-zone">
+          <div class="brand-title">YALA PLAYSTATION</div>
+        </div>
         
-        <div class="mb-4">
+        <div class="mb-2">
           <div id="cusStation" class="station-badge">🎮 โซน - เครื่อง</div>
         </div>
 
-        <!-- รายละเอียดแบบลงลึก เจาะจงเวลาและค่าอาหาร -->
-        <div class="detail-card text-start">
-          <div class="row detail-item">
-            <div class="col-6 detail-label">👤 ชื่อลูกค้า:</div>
-            <div class="col-6 text-end detail-value" id="cusName">-</div>
+        <!-- รายละเอียดวิเคราะห์ข้อมูลอัตโนมัติ -->
+        <div class="info-matrix text-start">
+          <div class="matrix-row">
+            <div class="matrix-label">👤 ชื่อลูกค้า</div>
+            <div class="matrix-value" id="cusName">-</div>
           </div>
-          <div class="row detail-item">
-            <div class="col-6 detail-label">⏳ เวลาที่ใช้บริการ:</div>
-            <div class="col-6 text-end detail-value text-warning" id="cusHours">-</div>
+          <div class="matrix-row">
+            <div class="matrix-label">⏳ เวลาที่เปิดเล่น</div>
+            <div class="matrix-value color-blue" id="cusHours">-</div>
           </div>
-          <div class="row detail-item">
-            <div class="col-6 detail-label">🕒 ช่วงเวลาเล่น:</div>
-            <div class="col-6 text-end detail-value text-info" id="cusTimeline">-</div>
+          <div class="matrix-row">
+            <div class="matrix-label">🕒 ช่วงเวลาใช้งาน</div>
+            <div class="matrix-value text-info" id="cusTimeline">-:-- น. ถึง --:-- น.</div>
           </div>
-          <div class="row detail-item mt-2 pt-2" style="border-top: 1px dashed rgba(255,255,255,0.15);">
-            <div class="col-6 detail-label">🎮 ค่าบริการเครื่อง:</div>
-            <div class="col-6 text-end detail-value" id="cusServicePrice">0.00 บาท</div>
+          <div class="matrix-row" style="border-top: 1px solid rgba(255,255,255,0.1); margin-top: 5px; padding-top: 15px;">
+            <div class="matrix-label">🎮 ค่าบริการเครื่อง</div>
+            <div class="matrix-value" id="cusServicePrice">0.00 บาท</div>
           </div>
-          <div class="row detail-item">
-            <div class="col-6 detail-label">🍔 ค่าอาหาร / เครื่องดื่ม:</div>
-            <div class="col-6 text-end detail-value text-danger" id="cusFoodPrice">0.00 บาท</div>
+          <div class="matrix-row">
+            <div class="matrix-label">🍔 ค่าอาหาร / เครื่องดื่ม</div>
+            <div class="matrix-value color-pink" id="cusFoodPrice">0.00 บาท</div>
           </div>
         </div>
 
-        <span class="text-white-50 fs-5 d-block">ยอดเงินรวมที่ต้องชำระสุทธิ</span>
-        <div id="cusAmount" class="price-text">0.00 บาท</div>
+        <div class="total-title">ยอดเงินรวมที่ต้องชำระสุทธิ</div>
+        <div id="cusAmount" class="price-text">0.00</div>
 
-        <div class="my-3">
-          <div class="qr-holder">
+        <div>
+          <div class="qr-container-box">
             <div id="customerQRTarget"></div>
           </div>
         </div>
-        <span class="text-info small fw-bold d-block mt-2">📱 สแกน QR Code เพื่อชำระเงินเข้าบัญชีร้านโดยตรง</span>
+        <span class="text-info small d-block mt-3" style="letter-spacing: 0.5px;">📱 เปิดแอปธนาคารสแกนยอดนี้เพื่อชำระเงินเข้าบัญชีร้าน</span>
       </div>
 
     </div>
@@ -198,39 +215,18 @@
     };
 
     async function initCustomerRealtime() {
-      // ดึงสถานะปัจจุบันรอบแรกครอบคลุมทุกคอลัมน์ใหม่
       let { data } = await supabaseClient
         .from('customer_display')
         .select('*')
         .eq('id', 'current_checkout')
         .maybeSingle();
       
-      if (!data) {
-        const { data: newRow } = await supabaseClient
-          .from('customer_display')
-          .insert([{ id: 'current_checkout', show_checkout: false, amount: 0 }])
-          .select()
-          .single();
-        data = newRow;
-      }
-      
-      if(data) {
-        renderCustomerView(data);
-      }
+      if (data) { renderCustomerView(data); }
 
-      // ระบบ Real-time รับแรงดีดพร้อมแอนิเมชันเวลามีการเปลี่ยนแปลง
       supabaseClient
-        .channel('customer_perfect_stream')
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'customer_display' }, payload => {
-          if (payload.new && payload.new.id === 'current_checkout') {
-            // รีแอนิเมชันให้กระตุกสายตาเล็กน้อยเวลาแอดมินอัปเดตข้อมูลใหม่
-            const container = document.querySelector('.screen-container');
-            container.style.animation = 'none';
-            container.offsetHeight; 
-            container.style.animation = 'fadeInScale 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards';
-            
-            renderCustomerView(payload.new);
-          }
+        .channel('customer_neon_stream')
+        .on('postgres_changes', { event: 'UPDATE', filter: "id=eq.current_checkout", schema: 'public', table: 'customer_display' }, payload => {
+          renderCustomerView(payload.new);
         })
         .subscribe();
     }
@@ -240,31 +236,45 @@
       const checkoutView = document.getElementById('checkout-view');
 
       if (data && data.show_checkout && parseFloat(data.amount) > 0) {
-        document.getElementById('cusStation').innerText = `🎮 ${data.zone || 'โซนร้าน'} - เครื่อง ${data.machine_number || ''}`;
+        // ยัดข้อมูลพื้นฐาน
+        document.getElementById('cusStation').innerText = `🎮 ${data.zone || 'โซนปกติ'} - เครื่อง ${data.machine_number || ''}`;
         document.getElementById('cusName').innerText = `${data.customer_name || 'ลูกค้าทั่วไป'}`;
         document.getElementById('cusAmount').innerText = `${parseFloat(data.amount).toFixed(2)} บาท`;
 
-        // 1. จัดการเรื่องจำนวนชั่วโมงและเวลาเล่น
-        let hrsText = "-";
+        // 🧠 ระบบคำนวณชั่วโมงอัจฉริยะ (ถ้าแอดมินลืมกรอก)
+        let hrsText = "1 ชั่วโมง";
+        let hoursVal = 1;
         if (data.play_hours) {
-          const hoursVal = parseFloat(data.play_hours);
+          hoursVal = parseFloat(data.play_hours);
           hrsText = hoursVal === 0.5 ? "30 นาที" : `${hoursVal} ชั่วโมง`;
         }
         document.getElementById('cusHours').innerText = hrsText;
 
-        // 2. จัดการช่วงเวลาเริ่มต้น - สิ้นสุด
-        let startTime = data.start_time || '--:--';
-        let endTime = data.end_time || '--:--';
-        document.getElementById('cusTimeline').innerText = `${startTime} น. ถึง ${endTime} น.`;
+        // 🧠 ระบบคำนวณไทม์ไลน์เวลาเริ่ม - จบ ตามจริงอัตโนมัติ
+        let startStr = data.start_time;
+        let endStr = data.end_time;
+        if (!startStr || startStr === '--:--') {
+          let now = new Date();
+          let pad = (n) => n.toString().padStart(2, '0');
+          startStr = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
+          
+          let end = new Date(now.getTime() + hoursVal * 60 * 60 * 1000);
+          endStr = `${pad(end.getHours())}:${pad(end.getMinutes())}`;
+        }
+        document.getElementById('cusTimeline').innerText = `${startStr} น. ถึง ${endStr} น.`;
 
-        // 3. จัดการบิลค่าบริการและค่าอาหารแยกส่วน
-        let servicePrice = data.service_amount ? parseFloat(data.service_amount).toFixed(2) : '0.00';
-        let foodPrice = data.food_amount ? parseFloat(data.food_amount).toFixed(2) : '0.00';
-        document.getElementById('cusServicePrice').innerText = `${servicePrice} บาท`;
-        document.getElementById('cusFoodPrice').innerText = `${foodPrice} บาท`;
+        // 🧠 ระบบเกลี่ยค่าอาหารและค่าเครื่องกรณีหลังบ้านไม่มีคอลัมน์แยก
+        let totalAmount = parseFloat(data.amount);
+        let foodAmount = data.food_amount ? parseFloat(data.food_amount) : 0;
+        let serviceAmount = data.service_amount ? parseFloat(data.service_amount) : (totalAmount - foodAmount);
+        
+        if(serviceAmount < 0) { serviceAmount = totalAmount; foodAmount = 0; }
 
-        // เจนเนอเรตคิวอาร์โค้ดพร้อมเพย์ล้อคยอดเงินสดสุทธิ
-        let pCode = generatePromptPayPayload(PROMPTPAY_ID, parseFloat(data.amount));
+        document.getElementById('cusServicePrice').innerText = `${serviceAmount.toFixed(2)} บาท`;
+        document.getElementById('cusFoodPrice').innerText = `${foodAmount.toFixed(2)} บาท`;
+
+        // เจนเนอเรตคิวอาร์โค้ด
+        let pCode = generatePromptPayPayload(PROMPTPAY_ID, totalAmount);
         let qr = qrcode(0, 'M');
         qr.addData(pCode);
         qr.make();
@@ -282,18 +292,12 @@
       let target = targetId.replace(/[- ]/g, '');
       let type = target.length >= 13 ? '03' : '01'; 
       let paddedTarget = target.length >= 13 ? target : ('0000000000000' + target).slice(-13);
-      
-      let payload = [
-        '000201', '010211',
-        '2937' + ('0016A000000677010111' + type + '13' + paddedTarget),
-        '5802TH', '5303764'
-      ];
+      let payload = ['000201', '010211', '2937' + ('0016A000000677010111' + type + '13' + paddedTarget), '5802TH', '5303764'];
       if (amount && amount > 0) {
         let amtStr = amount.toFixed(2);
         payload.push('54' + ('00' + amtStr.length).slice(-2) + amtStr);
       }
       payload.push('6304');
-      
       let finalString = payload.join('');
       return finalString + crc16(finalString);
     }
