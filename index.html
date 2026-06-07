@@ -21,7 +21,6 @@
       --glass-border: rgba(255, 255, 255, 0.12);
     }
 
-    /* แอนิเมชันพื้นหลังไล่สี RGB ไหลเวียนแบบไดนามิก */
     @keyframes RGBBackground {
       0% { background-position: 0% 50%; }
       50% { background-position: 100% 50%; }
@@ -43,7 +42,6 @@
       overflow-x: hidden;
     }
 
-    /* ลายตาราง Cyber Grid ฉากหลังเกมเมอร์ */
     body::before {
       content: "";
       position: absolute;
@@ -64,7 +62,6 @@
       z-index: 1;
     }
 
-    /* การ์ดสไตล์กระจก Glassmorphism ขอบเรืองแสง RGB */
     .main-panel { 
       background: var(--glass-bg); 
       border: 2px solid var(--glass-border);
@@ -103,7 +100,6 @@
       text-shadow: 0 0 20px rgba(0, 240, 255, 0.3);
     }
 
-    /* ป้ายบอกเครื่องสไตล์นีออนบาร์ */
     .station-pill {
       background: linear-gradient(90deg, rgba(255, 0, 127, 0.2), rgba(157, 78, 221, 0.2));
       border: 2px solid var(--neon-pink);
@@ -120,7 +116,6 @@
       margin-bottom: 35px;
     }
 
-    /* แยกฝั่งเลย์เอาท์ ซ้าย-ขวา บาลานซ์สายตา */
     .split-layout {
       display: flex;
       gap: 40px;
@@ -144,7 +139,6 @@
       padding-left: 40px;
     }
 
-    /* กล่องข้อความแสดงรายละเอียดบิล */
     .info-grid-box {
       background: rgba(0, 0, 0, 0.4);
       border: 1px solid rgba(255, 255, 255, 0.08);
@@ -169,7 +163,6 @@
     .glow-pink { color: var(--neon-pink) !important; text-shadow: 0 0 12px rgba(255,0,127,0.6); }
     .glow-purple { color: #b5179e !important; text-shadow: 0 0 12px rgba(181,23,158,0.6); }
 
-    /* ยอดรวมสุทธิเรืองแสงเขียวนีออนสะใจ */
     .total-price-wrap {
       background: rgba(57, 255, 20, 0.06);
       padding: 20px 30px;
@@ -181,7 +174,6 @@
     .grand-title { font-size: 1rem; color: var(--neon-green); font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; }
     .grand-price { font-size: 3.8rem; font-weight: 900; color: var(--neon-green); text-shadow: 0 0 25px rgba(57,255,20,0.6); line-height: 1.1; margin-top: 5px; }
 
-    /* กรอบครอบคิวอาร์โค้ดขอบเรืองแสงไซแอน */
     .premium-qr-frame {
       background: #ffffff;
       padding: 15px;
@@ -191,7 +183,6 @@
     }
     .premium-qr-frame img { width: 220px; height: 220px; display: block; border-radius: 12px; }
 
-    /* หน้าจอตอน Standby สีสันอลังการดึงดูดสายตา */
     .standby-wrapper {
       padding: 50px 0;
       display: flex;
@@ -223,7 +214,6 @@
   <div class="screen-container">
     <div class="main-panel">
       
-      <!-- 1. หน้าจอ Standby (ตอนเครื่องว่าง) -->
       <div id="welcome-view" class="standby-wrapper" style="display: block;">
         <img src="https://cqhtdhdbbprptotcxevo.supabase.co/storage/v1/object/public/images/logo.jfif" alt="YALA PLAYSTATION" class="welcome-logo">
         <div class="brand-text" style="font-size: 2.8rem;">YALA PLAYSTATION</div>
@@ -231,7 +221,6 @@
         <div class="welcome-p">🎮 แจ้งเปิดเครื่องเล่น หรือสั่งเมนูอาหารกับแอดมินได้เลยครับ 🍔</div>
       </div>
 
-      <!-- 2. หน้าจอ Checkout (ตอนเรียกเก็บเงิน) -->
       <div id="checkout-view" style="display: none;">
         
         <div class="brand-header">
@@ -243,10 +232,8 @@
           <div id="cusStation" class="station-pill">🎮 โซน - เครื่อง</div>
         </div>
 
-        <!-- เริ่มต้นเลย์เอาท์แบบสองฝั่ง RGB Matrix -->
         <div class="split-layout">
           
-          <!-- ฝั่งซ้าย: ข้อมูลแจกแจงบิล -->
           <div class="billing-side">
             <div class="info-grid-box">
               <div class="grid-item-row">
@@ -277,7 +264,6 @@
             </div>
           </div>
 
-          <!-- ฝั่งขวา: คิวอาร์โค้ดพร้อมเพย์ล้อมกรอบไฟนีออน -->
           <div class="qr-side">
             <div class="premium-qr-frame">
               <div id="customerQRTarget"></div>
@@ -288,7 +274,7 @@
             </div>
           </div>
 
-        </div> <!-- จบ Split-Layout -->
+        </div>
 
       </div>
 
@@ -329,8 +315,9 @@
       const welcomeView = document.getElementById('welcome-view');
       const checkoutView = document.getElementById('checkout-view');
 
-      if (data && data.show_checkout && parseFloat(data.amount) > 0) {
-        // ประกาศตัวแปร hoursVal ไว้ด้านบนสุดของฟังก์ชัน เพื่อแก้ไขปัญหาบิลค้าง/คิวอาร์ไม่แสดงผล 🛠️
+      // 🛠️ แก้ไข Logic ตัวเช็คเงื่อนไข: ตรวจสอบเฉพาะยอดเงินรวมสุทธิ (amount)
+      // หากยอดเงินมากกว่า 0 และตัวแปรข้อมูลสมบูรณ์ ให้แสดงหน้ารายละเอียดบิลและสร้างคิวอาร์ทันทีโดยไม่ต้องง้อค่าโชว์อื่น ๆ
+      if (data && data.amount && parseFloat(data.amount) > 0) {
         let hoursVal = 1; 
         let hrsText = "1 ชั่วโมง";
         
@@ -364,7 +351,7 @@
         document.getElementById('cusServicePrice').innerText = `${serviceAmount.toFixed(2)} บาท`;
         document.getElementById('cusFoodPrice').innerText = `${foodAmount.toFixed(2)} บาท`;
 
-        // สร้างคิวอาร์โค้ด
+        // สั่งวาด QR Code ยอดราคาเช็คบิลล่าสุดขึ้นจอ
         let pCode = generatePromptPayPayload(PROMPTPAY_ID, totalAmount);
         let qr = qrcode(0, 'M');
         qr.addData(pCode);
@@ -374,6 +361,7 @@
         welcomeView.style.display = 'none';
         checkoutView.style.display = 'block';
       } else {
+        // ถ้ายอดเป็น 0 หรือถูกรีเซ็ตบิล ให้กลับไปหน้าจอต้อนรับว่างตามเดิม
         welcomeView.style.display = 'block';
         checkoutView.style.display = 'none';
       }
