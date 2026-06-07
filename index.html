@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>YALA PLAYSTATION - จอแสดงผลลูกค้า 📺</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+
+  <style>
+    body { background-color: #0f172a; color: #f8fafc; font-family: 'Prompt', sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; overflow: hidden; }
+    .screen-container { width: 100%; max-width: 750px; padding: 20px; text-center; }
+    .display-card { background: radial-gradient(circle at top left, #1e293b, #0f172a); border-radius: 30px; border: 3px solid #3b82f6; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); padding: 40px; text-align: center; transition: all 0.3s ease; }
+    .welcome-card { border-color: #10b981; background: radial-gradient(circle at top left, #111827, #0f172a); }
+    .qr-holder { background: white; padding: 20px; border-radius: 20px; display: inline-block; box-shadow: 0 10px 25px rgba(0,0,0,0.3); margin: 25px 0; }
+    .qr-holder img { width: 240px; height: auto; }
+    .price-text { font-size: 4.5rem; font-weight: 800; color: #f43f5e; text-shadow: 0 0 20px rgba(244,63,94,0.3); margin: 15px 0; }
+    .station-title { font-size: 2.2rem; font-weight: 800; color: #3b82f6; }
+    .logo-big { font-size: 3.5rem; font-weight: 800; color: #10b981; letter-spacing: 2px; text-shadow: 0 0 15px rgba(16,185,129,0.4); animation: pulse 2s infinite; }
+    @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.03); } }
+  </style>
+</head>
+<body>
+
+  <div class="screen-container">
+    <!-- 1. หน้าจอสแตนด์บายปกติ (Welcome Screen) -->
+    <div id="welcome-view" class="display-card welcome-card">
+      <div class="logo-big mb-3">🎮 YALA PLAYSTATION</div>
+      <h2 class="fw-bold text-white">ยินดีต้อนรับสู่ร้านเกมของเรา</h2>
+      <p class="text-muted fs-5 mt-3">ขอให้สนุกกับการเล่นเกมส์ครับ ขอบคุณที่ใช้บริการครับ 😊</p>
+    </div>
+
+    <!-- 2. หน้าจอแสดงบิลชำระเงินพร้อมเพย์ (Checkout Screen) -->
+    <div id="checkout-view" class="display-card" style="display: none;">
+      <h3 class="text-white-50 fw-bold mb-1">🧾 ยอดสรุปค่าบริการ</h3>
+      <div id="cusStation" class="station-title">-</div>
+      <div id="cusName" class="text-warning fw-bold fs-4 mb-2">คุณ: -</div>
+      
+      <div class="qr-holder">
+        <div id="customerQRTarget"></div>
+      </div>
+      
+      <div class="text-muted small">สแกนจ่ายง่ายๆ ผ่าน App ธนาคารได้ทุกแอป</div>
+      <div id="cusAmount" class="price-text">0.00 บาท</div>
+      <h5 class="text-success fw-bold">📱 เมื่อชำระเงินเรียบร้อยแล้ว แจ้งแอดมินได้เลยครับ</h5>
+    </div>
+  </div>
+
+  <script>
+    const PROMPTPAY_ID = '0980597696'; // 💡 แก้เป็นเบอร์พร้อมเพย์ร้านคุณให้ตรงกับเครื่องหลัก
+    const SUPABASE_URL = 'https://cqhtdhdbbprptotcxevo.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNxaHRkaGRiYnBycHRvdGN4ZXZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2NjI3MDgsImV4cCI6MjA5NjIzODcwOH0.8rRvayE0qhqRxYHNHnG3_bI9KTqxWUBjbCMpKTdTnY4';
+    
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // --- ฟังก์ชันสูตรคณิตศาสตร์สำหรับสร้าง PromptPay QR เหมือนหน้าจอแอดมิน ---
+    function generatePromptPayPayload(targetId, amount) {
+      let target = targetId.replace(/[- ]/g, '');
+      let type = target.length >= 13 ? '03' : '01'; 
+      let paddedTarget = target.length >= 13 ? target : ('0000000000000' + target).slice(-13);
+      let payload = ['000201', '010211', '2937' + ('0016A000000677010111' + type + '13' + paddedTarget), '5802TH', '5303764'];
+      if (amount && amount > 0) {
+        let amtStr = amount.toFixed(2);
+        payload.push('54' + ('00' + amtStr.length).slice(-2) + amtStr);
+      }
+      payload.push('6304');
+      let finalString = payload.join('');
+      return finalString + crc16(finalString);
+    }
+
+    function crc16(str) {
+      let crc = 0xFFFF;
+      for (let c = 0; c < str.length; c++) {
+        let code = str.charCodeAt(c); crc ^= (code << 8);
+        for (let i = 0; i < 8; i++) {
+          if (crc & 0x8000) crc = (crc << 1) ^ 0x1021; else crc = crc << 1;
+        }
+      }
+      return ('0000' + (crc & 0xFFFF).toString(16).toUpperCase()).slice(-4);
+    }
+
+    // --- ฟังก์ชันดึงและอัปเดตหน้าจอแปรผันตาม Supabase ---
+    async function listenToCustomerDisplay() {
+      // ดึงข้อมูลครั้งแรกมาแสดงผลก่อน
+      const { data } = await supabaseClient.from('customer_display').select('*').eq('id', 'current_checkout').single();
+      if(data) {
+        renderCustomerView(data);
+      }
+
+      // เปิดระบบท่อส่งข้อมูลดิ่งตรง (Realtime Subscription) ตรวจจับเมื่อแอดมินกดเช็คบิล
+      supabaseClient
+        .channel('customer_changes')
+        .on('postgres_changes', { event: 'UPDATE', filter: "id=eq.current_checkout", schema: 'public', table: 'customer_display' }, payload => {
+          renderCustomerView(payload.new);
+        })
+        .subscribe();
+    }
+
+    function renderCustomerView(data) {
+      const welcomeView = document.getElementById('welcome-view');
+      const checkoutView = document.getElementById('checkout-view');
+
+      if (data.show_checkout && data.amount > 0) {
+        document.getElementById('cusStation').innerText = `🎮 ${data.zone} - เครื่อง ${data.machine_number}`;
+        document.getElementById('cusName').innerText = `คุณ: ${data.customer_name || 'ลูกค้าทั่วไป'}`;
+        document.getElementById('cusAmount').innerText = `${parseFloat(data.amount).toFixed(2)} บาท`;
+
+        // เจนเนอเรตคิวอาร์โค้ดล็อกยอดเงินตรงนี้
+        let pCode = generatePromptPayPayload(PROMPTPAY_ID, parseFloat(data.amount));
+        let qr = qrcode(0, 'M');
+        qr.addData(pCode);
+        qr.make();
+        document.getElementById('customerQRTarget').innerHTML = qr.createImgTag(5);
+
+        welcomeView.style.display = 'none';
+        checkoutView.style.display = 'block';
+      } else {
+        welcomeView.style.display = 'block';
+        checkoutView.style.display = 'none';
+      }
+    }
+
+    window.onload = function() {
+      listenToCustomerDisplay();
+    };
+  </script>
+</body>
+</html>
