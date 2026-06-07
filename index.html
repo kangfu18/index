@@ -45,8 +45,7 @@
 
         <div class="info-grid text-start">
           <div class="row">
-            <div class="col-6"><span class="text-muted small d-block">ชื่อลูกค้า</span><h4 id="cusName" class="fw-bold m-0 text-white">-</h4></div>
-            <div class="col-6 text-end"><span class="text-muted small d-block">เวลาที่ลงทะเบียน</span><h4 id="cusHours" class="fw-bold m-0 text-warning">-</h4></div>
+            <div class="col-12"><span class="text-muted small d-block">ชื่อลูกค้า</span><h4 id="cusName" class="fw-bold m-0 text-white">-</h4></div>
           </div>
         </div>
 
@@ -65,9 +64,7 @@
   </div>
 
   <script>
-    // ตั้งค่าตัวแปรเบอร์พร้อมเพย์ร้าน
     const PROMPTPAY_ID = '0980597696';
-    
     const SUPABASE_URL = 'https://cqhtdhdbbprptotcxevo.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNxaHRkaGRiYnBycHRvdGN4ZXZvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2NjI3MDgsImV4cCI6MjA5NjIzODcwOH0.8rRvayE0qhqRxYHNHnG3_bI9KTqxWUBjbCMpKTdTnY4';
     
@@ -78,22 +75,33 @@
     };
 
     async function initCustomerRealtime() {
-      // ดึงสถานะปัจจุบันมาแสดงก่อนรอบแรก
-      const { data } = await supabaseClient
+      // ดึงสถานะปัจจุบันรอบแรก (ถอดตัวแปร play_hours ที่สร้างปัญหาออกแล้ว)
+      let { data } = await supabaseClient
         .from('customer_display')
-        .select('*')
+        .select('id, show_checkout, zone, machine_number, customer_name, amount')
         .eq('id', 'current_checkout')
-        .single();
+        .maybeSingle();
+      
+      if (!data) {
+        const { data: newRow } = await supabaseClient
+          .from('customer_display')
+          .insert([{ id: 'current_checkout', show_checkout: false, amount: 0 }])
+          .select()
+          .single();
+        data = newRow;
+      }
       
       if(data) {
         renderCustomerView(data);
       }
 
-      // ตรวจจับเหตุการณ์ Real-time เมื่อแอดมินกดเปิดโต๊ะ/เช็คบิล/เพิ่มอาหาร
+      // ระบบตรวจจับ Real-time ยอดสแกนเงินสด/เงินโอน
       supabaseClient
-        .channel('customer_changes')
-        .on('postgres_changes', { event: 'UPDATE', filter: "id=eq.current_checkout", schema: 'public', table: 'customer_display' }, payload => {
-          renderCustomerView(payload.new);
+        .channel('customer_global_stream')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'customer_display' }, payload => {
+          if (payload.new && payload.new.id === 'current_checkout') {
+            renderCustomerView(payload.new);
+          }
         })
         .subscribe();
     }
@@ -102,20 +110,12 @@
       const welcomeView = document.getElementById('welcome-view');
       const checkoutView = document.getElementById('checkout-view');
 
-      if (data.show_checkout && data.amount > 0) {
-        document.getElementById('cusStation').innerText = `🎮 ${data.zone} - เครื่อง ${data.machine_number}`;
+      if (data && data.show_checkout && parseFloat(data.amount) > 0) {
+        document.getElementById('cusStation').innerText = `🎮 ${data.zone || 'โซนความบันเทิง'} - เครื่อง ${data.machine_number || ''}`;
         document.getElementById('cusName').innerText = `คุณ: ${data.customer_name || 'ลูกค้าทั่วไป'}`;
         document.getElementById('cusAmount').innerText = `${parseFloat(data.amount).toFixed(2)} บาท`;
 
-        // แก้ไขจุดบั๊ก: ตรวจสอบและแสดงจำนวนชั่วโมง (แปลงค่าถ้าเป็น 30 นาที ให้สวยงาม)
-        let hrsText = "0 ชั่วโมง";
-        if (data.play_hours) {
-          const hoursVal = parseFloat(data.play_hours);
-          hrsText = hoursVal === 0.5 ? "30 นาที" : `${hoursVal} ชั่วโมง`;
-        }
-        document.getElementById('cusHours').innerText = hrsText;
-
-        // เจนเนอเรตคิวอาร์โค้ดล็อกยอดเงินแบบ Real-time
+        // สร้างคิวอาร์โค้ดล็อกยอด
         let pCode = generatePromptPayPayload(PROMPTPAY_ID, parseFloat(data.amount));
         let qr = qrcode(0, 'M');
         qr.addData(pCode);
@@ -130,7 +130,6 @@
       }
     }
 
-    // --- ฟังก์ชันสร้าง PromptPay QR Code ---
     function generatePromptPayPayload(targetId, amount) {
       let target = targetId.replace(/[- ]/g, '');
       let type = target.length >= 13 ? '03' : '01'; 
