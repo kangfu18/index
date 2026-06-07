@@ -45,7 +45,8 @@
 
         <div class="info-grid text-start">
           <div class="row">
-            <div class="col-12"><span class="text-muted small d-block">ชื่อลูกค้า</span><h4 id="cusName" class="fw-bold m-0 text-white">-</h4></div>
+            <div class="col-6"><span class="text-muted small d-block">ชื่อลูกค้า</span><h4 id="cusName" class="fw-bold m-0 text-white">-</h4></div>
+            <div class="col-6 text-end"><span class="text-muted small d-block">เวลาลงทะเบียน</span><h4 id="cusHours" class="fw-bold m-0 text-warning">-</h4></div>
           </div>
         </div>
 
@@ -75,10 +76,10 @@
     };
 
     async function initCustomerRealtime() {
-      // ดึงสถานะปัจจุบันรอบแรก (ถอดตัวแปร play_hours ที่สร้างปัญหาออกแล้ว)
+      // ดึงสถานะปัจจุบันรอบแรก (ดึงฟิลด์ play_hours กลับมารับค่าชั่วโมง)
       let { data } = await supabaseClient
         .from('customer_display')
-        .select('id, show_checkout, zone, machine_number, customer_name, amount')
+        .select('id, show_checkout, zone, machine_number, customer_name, amount, play_hours')
         .eq('id', 'current_checkout')
         .maybeSingle();
       
@@ -95,7 +96,7 @@
         renderCustomerView(data);
       }
 
-      // ระบบตรวจจับ Real-time ยอดสแกนเงินสด/เงินโอน
+      // ระบบตรวจจับแบบ Real-time ยิงแรงดีดสดจากฝั่งแอดมิน
       supabaseClient
         .channel('customer_global_stream')
         .on('postgres_changes', { event: '*', schema: 'public', table: 'customer_display' }, payload => {
@@ -115,7 +116,15 @@
         document.getElementById('cusName').innerText = `คุณ: ${data.customer_name || 'ลูกค้าทั่วไป'}`;
         document.getElementById('cusAmount').innerText = `${parseFloat(data.amount).toFixed(2)} บาท`;
 
-        // สร้างคิวอาร์โค้ดล็อกยอด
+        // แสดงผลจำนวนชั่วโมงแบบ Real-time
+        let hrsText = "ไม่ระบุชั่วโมง";
+        if (data.play_hours) {
+          const hoursVal = parseFloat(data.play_hours);
+          hrsText = hoursVal === 0.5 ? "30 นาที" : `${hoursVal} ชั่วโมง`;
+        }
+        document.getElementById('cusHours').innerText = hrsText;
+
+        // เจนเนอเรตคิวอาร์โค้ดพร้อมเพย์ตามยอดเงินจริง
         let pCode = generatePromptPayPayload(PROMPTPAY_ID, parseFloat(data.amount));
         let qr = qrcode(0, 'M');
         qr.addData(pCode);
