@@ -2,101 +2,125 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8">
-  <title>YALA PLAYSTATION - CUSTOMER DISPLAY</title>
+  <title>YALA PLAYSTATION - RGB GAMER DISPLAY</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2 family=Prompt:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
 
   <style>
     :root {
-      --ps-dark-bg: #030712;
-      --ps-surface: rgba(15, 23, 42, 0.65);
-      --ps-border: rgba(255, 255, 255, 0.08);
-      --ps-blue-glow: #00f0ff;
-      --ps-pink-glow: #ff007f;
-      --ps-green-glow: #00e676;
+      --neon-blue: #00f0ff;
+      --neon-pink: #ff007f;
+      --neon-purple: #9d4edd;
+      --neon-green: #39ff14;
+      --glass-bg: rgba(10, 15, 30, 0.75);
+      --glass-border: rgba(255, 255, 255, 0.12);
+    }
+
+    /* แอนิเมชันพื้นหลังไล่สี RGB ไหลเวียนแบบไดนามิก */
+    @keyframes RGBBackground {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
     }
 
     body { 
-      background-color: var(--ps-dark-bg); 
-      color: #f8fafc; 
+      background: linear-gradient(-45deg, #090514, #0a1128, #1c0a26, #021a24);
+      background-size: 400% 400%;
+      animation: RGBBackground 15s ease infinite;
+      color: #ffffff; 
       font-family: 'Prompt', sans-serif; 
       display: flex; 
       align-items: center; 
       justify-content: center; 
       min-height: 100vh; 
       margin: 0;
-      background-image: 
-        radial-gradient(circle at 10% 20%, rgba(0, 240, 255, 0.05) 0%, transparent 40%),
-        radial-gradient(circle at 90% 80%, rgba(255, 0, 127, 0.05) 0%, transparent 40%);
+      position: relative;
+      overflow-x: hidden;
     }
 
-    /* Animation สมูทนุ่มลึกสไตล์ UI เครื่องคอนโซล */
-    @keyframes eSportsFadeIn {
-      0% { opacity: 0; transform: translateY(20px); filter: blur(10px); }
-      100% { opacity: 1; transform: translateY(0); filter: blur(0); }
+    /* เพิ่มลายตาราง Cyber Grid แบบฉากหลังเกมเมอร์ */
+    body::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-image: 
+        linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+      background-size: 30px 30px;
+      z-index: 0;
+      pointer-events: none;
     }
 
     .screen-container { 
       width: 100%; 
-      max-width: 980px; 
-      padding: 20px; 
-      animation: eSportsFadeIn 0.8s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+      max-width: 950px; 
+      padding: 25px; 
+      position: relative;
+      z-index: 1;
     }
 
+    /* การ์ดสไตล์กระจก Glassmorphism ขอบเรืองแสง RGB จางๆ */
     .main-panel { 
-      background: var(--ps-surface); 
-      border: 1px solid var(--ps-border);
-      border-radius: 28px; 
+      background: var(--glass-bg); 
+      border: 2px solid var(--glass-border);
+      border-radius: 32px; 
       padding: 45px; 
-      backdrop-filter: blur(25px);
-      box-shadow: 0 25px 70px rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      box-shadow: 
+        0 20px 50px rgba(0, 0, 0, 0.6),
+        0 0 40px rgba(0, 240, 255, 0.15);
     }
 
-    /* จัดระเบียบหัวข้อแบรนด์ */
     .brand-header {
       display: flex;
       flex-direction: column;
       align-items: center;
-      margin-bottom: 35px;
-    }
-
-    .main-logo {
-      width: 120px;
-      height: auto;
-      margin-bottom: 15px;
-      border-radius: 16px;
-      box-shadow: 0 0 30px rgba(0, 240, 255, 0.25);
-    }
-
-    .brand-text {
-      font-size: 2rem;
-      font-weight: 800;
-      letter-spacing: 3px;
-      text-transform: uppercase;
-      background: linear-gradient(to right, #ffffff, #94a3b8);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-    .station-pill {
-      background: rgba(255, 0, 127, 0.1);
-      border: 1px solid rgba(255, 0, 127, 0.3);
-      padding: 6px 24px;
-      border-radius: 100px;
-      font-size: 1.15rem;
-      font-weight: 600;
-      color: var(--ps-pink-glow);
-      text-shadow: 0 0 10px rgba(255, 0, 127, 0.4);
-      display: inline-block;
       margin-bottom: 30px;
     }
 
-    /* Layout แบบแยกสองฝั่งอย่างเป็นมืออาชีพ */
+    .main-logo {
+      width: 115px;
+      height: auto;
+      margin-bottom: 15px;
+      border-radius: 20px;
+      border: 2px solid var(--neon-blue);
+      box-shadow: 0 0 25px rgba(0, 240, 255, 0.5);
+    }
+
+    .brand-text {
+      font-size: 2.4rem;
+      font-weight: 900;
+      letter-spacing: 3px;
+      background: linear-gradient(135deg, #ffffff 40%, var(--neon-blue));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 20px rgba(0, 240, 255, 0.3);
+    }
+
+    /* ป้ายบอกเครื่องสไตล์นีออนบาร์ */
+    .station-pill {
+      background: linear-gradient(90deg, rgba(255, 0, 127, 0.2), rgba(157, 78, 221, 0.2));
+      border: 2px solid var(--neon-pink);
+      padding: 8px 32px;
+      border-radius: 16px;
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #fff;
+      text-shadow: 0 0 10px var(--neon-pink);
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 0 20px rgba(255, 0, 127, 0.3);
+      margin-bottom: 35px;
+    }
+
+    /* แยกฝั่งเลย์เอาท์ ซ้าย-ขวา บาลานซ์สายตา */
     .split-layout {
       display: flex;
       gap: 40px;
@@ -104,28 +128,28 @@
     }
 
     .billing-side {
-      flex: 1.2;
+      flex: 1.25;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
     }
 
     .qr-side {
-      flex: 0.8;
+      flex: 0.75;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      border-left: 1px solid rgba(255, 255, 255, 0.06);
+      border-left: 2px dashed rgba(255, 255, 255, 0.1);
       padding-left: 40px;
     }
 
-    /* ตารางแสดงข้อมูลรายละเอียด */
+    /* กล่องข้อความแสดงรายละเอียดบิล */
     .info-grid-box {
-      background: rgba(0, 0, 0, 0.25);
-      border: 1px solid rgba(255, 255, 255, 0.03);
-      border-radius: 20px;
-      padding: 15px 25px;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 24px;
+      padding: 20px 30px;
       margin-bottom: 25px;
     }
 
@@ -133,53 +157,64 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 12px 0;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      padding: 14px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
     }
     .grid-item-row:last-child { border-bottom: none; }
 
-    .grid-lbl { color: #64748b; font-size: 0.95rem; font-weight: 400; }
-    .grid-val { color: #e2e8f0; font-size: 1.1rem; font-weight: 500; }
+    .grid-lbl { color: #94a3b8; font-size: 1.05rem; font-weight: 500; }
+    .grid-val { color: #f8fafc; font-size: 1.2rem; font-weight: 600; }
 
-    .glow-cyan { color: var(--ps-blue-glow); text-shadow: 0 0 8px rgba(0,240,255,0.3); }
-    .glow-pink { color: var(--ps-pink-glow); text-shadow: 0 0 8px rgba(255,0,127,0.3); }
+    .glow-cyan { color: var(--neon-blue) !important; text-shadow: 0 0 12px rgba(0,240,255,0.6); }
+    .glow-pink { color: var(--neon-pink) !important; text-shadow: 0 0 12px rgba(255,0,127,0.6); }
+    .glow-purple { color: #b5179e !important; text-shadow: 0 0 12px rgba(181,23,158,0.6); }
 
-    /* โซนสรุปราคาสุดพรีเมียม */
+    /* ยอดรวมสุทธิเรืองแสงเขียวนีออนสะใจ ไม่มืดจืดชืด */
     .total-price-wrap {
-      background: linear-gradient(90deg, rgba(0, 230, 118, 0.05) 0%, transparent 100%);
-      padding: 15px 25px;
-      border-radius: 16px;
-      border-left: 4px solid var(--ps-green-glow);
+      background: rgba(57, 255, 20, 0.06);
+      padding: 20px 30px;
+      border-radius: 20px;
+      border: 1px solid rgba(57, 255, 20, 0.2);
+      border-left: 6px solid var(--neon-green);
+      box-shadow: 0 0 25px rgba(57, 255, 20, 0.05);
     }
-    .grand-title { font-size: 0.9rem; color: #84cc16; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; }
-    .grand-price { font-size: 3.5rem; font-weight: 800; color: var(--ps-green-glow); text-shadow: 0 0 20px rgba(0,230,118,0.3); line-height: 1.1; margin-top: 5px; }
+    .grand-title { font-size: 1rem; color: var(--neon-green); font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; }
+    .grand-price { font-size: 3.8rem; font-weight: 900; color: var(--neon-green); text-shadow: 0 0 25px rgba(57,255,20,0.6); line-height: 1.1; margin-top: 5px; }
 
-    /* ปรับแต่งกรอบครอบคิวอาร์ไม่ให้สว่างแย่งซีน */
+    /* กรอบครอบคิวอาร์โค้ดแบบขาวสะอาดเพื่อง่ายต่อการสแกน แต่เพิ่มขอบเรืองแสงไซแอนเข้าธีม */
     .premium-qr-frame {
       background: #ffffff;
-      padding: 12px;
-      border-radius: 20px;
-      box-shadow: 0 0 40px rgba(0, 240, 255, 0.15);
-      border: 1px solid rgba(255,255,255,0.1);
-      transition: transform 0.3s ease;
+      padding: 15px;
+      border-radius: 24px;
+      box-shadow: 0 0 35px rgba(0, 240, 255, 0.4);
+      border: 3px solid var(--neon-blue);
     }
-    .premium-qr-frame img { width: 220px; height: 220px; display: block; border-radius: 10px; }
+    .premium-qr-frame img { width: 220px; height: 220px; display: block; border-radius: 12px; }
 
-    /* หน้าจอ Standby แบบครอบคลุมเต็มจอ */
+    /* หน้าจอตอน Standby สีสันอลังการดึงดูดสายตา */
     .standby-wrapper {
-      padding: 60px 0;
+      padding: 50px 0;
       display: flex;
       flex-direction: column;
       align-items: center;
     }
-    .welcome-logo { width: 160px; height: auto; margin-bottom: 25px; border-radius: 24px; box-shadow: 0 0 40px rgba(0,240,255,0.2); }
-    .welcome-h1 { font-size: 3.2rem; font-weight: 800; letter-spacing: 1px; color: #f59e0b; text-shadow: 0 0 30px rgba(245,158,11,0.3); }
-    .welcome-p { color: #64748b; font-size: 1.15rem; margin-top: 15px; }
+    .welcome-logo { 
+      width: 170px; height: auto; margin-bottom: 30px; border-radius: 28px; 
+      border: 3px solid var(--neon-pink);
+      box-shadow: 0 0 40px rgba(255,0,127,0.5);
+    }
+    .welcome-h1 { 
+      font-size: 4rem; font-weight: 900; letter-spacing: 2px; 
+      background: linear-gradient(90deg, #ff9e00, #ff007f);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 30px rgba(255, 0, 127, 0.3); 
+    }
+    .welcome-p { color: #cbd5e1; font-size: 1.3rem; font-weight: 500; margin-top: 20px; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
 
-    /* Responsive */
-    @media (max-width: 850px) {
-      .split-layout { flex-direction: column; gap: 30px; }
-      .qr-side { border-left: none; padding-left: 0; pt-20px; border-top: 1px solid rgba(255, 255, 255, 0.06); }
+    @media (max-width: 880px) {
+      .split-layout { flex-direction: column; gap: 35px; }
+      .qr-side { border-left: none; padding-left: 0; padding-top: 35px; border-top: 2px dashed rgba(255, 255, 255, 0.1); }
     }
   </style>
 </head>
@@ -191,12 +226,12 @@
       <!-- 1. หน้าจอ Standby (ตอนเครื่องว่าง) -->
       <div id="welcome-view" class="standby-wrapper" style="display: block;">
         <img src="https://cqhtdhdbbprptotcxevo.supabase.co/storage/v1/object/public/images/logo.jfif" alt="YALA PLAYSTATION" class="welcome-logo">
-        <div class="brand-text" style="font-size: 2.5rem;">YALA PLAYSTATION</div>
+        <div class="brand-text" style="font-size: 2.8rem;">YALA PLAYSTATION</div>
         <div class="welcome-h1 my-3">READY TO PLAY</div>
-        <div class="welcome-p">แจ้งเปิดเครื่องเล่นเกมส์ หรือสั่งเมนูอร่อยกับแอดมินได้เลยครับ 😊</div>
+        <div class="welcome-p">🎮 แจ้งเปิดเครื่องเล่น หรือสั่งเมนูอาหารกับแอดมินได้เลยครับ 🍔</div>
       </div>
 
-      <!-- 2. หน้าจอ Checkout (ตอนแอดมินส่งบิลเรียกเก็บเงิน) -->
+      <!-- 2. หน้าจอ Checkout (ตอนเรียกเก็บเงิน) -->
       <div id="checkout-view" style="display: none;">
         
         <div class="brand-header">
@@ -208,7 +243,7 @@
           <div id="cusStation" class="station-pill">🎮 โซน - เครื่อง</div>
         </div>
 
-        <!-- เริ่มต้นระเบียบลายเอาท์แบบ Split-Screen -->
+        <!-- เริ่มต้นเลย์เอาท์แบบสองฝั่ง RGB Matrix -->
         <div class="split-layout">
           
           <!-- ฝั่งซ้าย: ข้อมูลแจกแจงบิล -->
@@ -224,7 +259,7 @@
               </div>
               <div class="grid-item-row">
                 <div class="grid-lbl">🕒 ช่วงเวลาใช้งาน</div>
-                <div class="grid-val text-white-50" id="cusTimeline">00:00 น. ถึง 00:00 น.</div>
+                <div class="grid-val glow-purple" id="cusTimeline">00:00 น. ถึง 00:00 น.</div>
               </div>
               <div class="grid-item-row">
                 <div class="grid-lbl">🎮 ค่าบริการเครื่อง</div>
@@ -237,19 +272,19 @@
             </div>
 
             <div class="total-price-wrap">
-              <div class="grand-title">ยอดรวมสุทธิที่ต้องชำระ</div>
+              <div class="grand-title">ยอดรวมสุทธิที่ต้องชำระ (NET)</div>
               <div id="cusAmount" class="grand-price">0.00 บาท</div>
             </div>
           </div>
 
-          <!-- ฝั่งขวา: คิวอาร์โค้ดพร้อมเพย์ไร้ขอบตัดสายตา -->
+          <!-- ฝั่งขวา: คิวอาร์โค้ดพร้อมเพย์ล้อมกรอบไฟนีออน -->
           <div class="qr-side">
             <div class="premium-qr-frame">
               <div id="customerQRTarget"></div>
             </div>
             <div class="text-center mt-3">
-              <span class="text-muted small d-block">📱 สแกน QR Code ผ่านแอปธนาคาร</span>
-              <span class="small d-block" style="color: var(--ps-blue-glow);">เพื่อโอนเข้าบัญชีร้านโดยตรง</span>
+              <span class="text-white-50 small d-block">📱 สแกน QR Code เพื่อชำระเงิน</span>
+              <span class="small d-block fw-bold" style="color: var(--neon-blue);">โอนเข้าบัญชีร้านโดยตรง</span>
             </div>
           </div>
 
