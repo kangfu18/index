@@ -43,7 +43,7 @@
       overflow-x: hidden;
     }
 
-    /* เพิ่มลายตาราง Cyber Grid แบบฉากหลังเกมเมอร์ */
+    /* ลายตาราง Cyber Grid ฉากหลังเกมเมอร์ */
     body::before {
       content: "";
       position: absolute;
@@ -64,7 +64,7 @@
       z-index: 1;
     }
 
-    /* การ์ดสไตล์กระจก Glassmorphism ขอบเรืองแสง RGB จางๆ */
+    /* การ์ดสไตล์กระจก Glassmorphism ขอบเรืองแสง RGB */
     .main-panel { 
       background: var(--glass-bg); 
       border: 2px solid var(--glass-border);
@@ -169,7 +169,7 @@
     .glow-pink { color: var(--neon-pink) !important; text-shadow: 0 0 12px rgba(255,0,127,0.6); }
     .glow-purple { color: #b5179e !important; text-shadow: 0 0 12px rgba(181,23,158,0.6); }
 
-    /* ยอดรวมสุทธิเรืองแสงเขียวนีออนสะใจ ไม่มืดจืดชืด */
+    /* ยอดรวมสุทธิเรืองแสงเขียวนีออนสะใจ */
     .total-price-wrap {
       background: rgba(57, 255, 20, 0.06);
       padding: 20px 30px;
@@ -181,7 +181,7 @@
     .grand-title { font-size: 1rem; color: var(--neon-green); font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; }
     .grand-price { font-size: 3.8rem; font-weight: 900; color: var(--neon-green); text-shadow: 0 0 25px rgba(57,255,20,0.6); line-height: 1.1; margin-top: 5px; }
 
-    /* กรอบครอบคิวอาร์โค้ดแบบขาวสะอาดเพื่อง่ายต่อการสแกน แต่เพิ่มขอบเรืองแสงไซแอนเข้าธีม */
+    /* กรอบครอบคิวอาร์โค้ดขอบเรืองแสงไซแอน */
     .premium-qr-frame {
       background: #ffffff;
       padding: 15px;
@@ -284,7 +284,7 @@
             </div>
             <div class="text-center mt-3">
               <span class="text-white-50 small d-block">📱 สแกน QR Code เพื่อชำระเงิน</span>
-              <span class="small d-block fw-bold" style="color: var(--neon-blue);">โอนเข้าบัญชีร้านโดยตรง</span>
+              <span class="small d-block" style="color: var(--neon-blue);">โอนเข้าบัญชีร้านโดยตรง</span>
             </div>
           </div>
 
@@ -330,16 +330,18 @@
       const checkoutView = document.getElementById('checkout-view');
 
       if (data && data.show_checkout && parseFloat(data.amount) > 0) {
-        document.getElementById('cusStation').innerText = `🎮 ${data.zone || 'โซนร้าน'} - เครื่อง ${data.machine_number || ''}`;
-        document.getElementById('cusName').innerText = `${data.customer_name || 'ลูกค้าทั่วไป'}`;
-        document.getElementById('cusAmount').innerText = `${parseFloat(data.amount).toFixed(2)} บาท`;
-
+        // ประกาศตัวแปร hoursVal ไว้ด้านบนสุดของฟังก์ชัน เพื่อแก้ไขปัญหาบิลค้าง/คิวอาร์ไม่แสดงผล 🛠️
+        let hoursVal = 1; 
         let hrsText = "1 ชั่วโมง";
-        let hoursVal = 1;
+        
         if (data.play_hours) {
           hoursVal = parseFloat(data.play_hours);
           hrsText = hoursVal === 0.5 ? "30 นาที" : `${hoursVal} ชั่วโมง`;
         }
+        
+        document.getElementById('cusStation').innerText = `🎮 ${data.zone || 'โซนร้าน'} - เครื่อง ${data.machine_number || ''}`;
+        document.getElementById('cusName').innerText = `${data.customer_name || 'ลูกค้าทั่วไป'}`;
+        document.getElementById('cusAmount').innerText = `${parseFloat(data.amount).toFixed(2)} บาท`;
         document.getElementById('cusHours').innerText = hrsText;
 
         let startStr = data.start_time;
@@ -362,6 +364,7 @@
         document.getElementById('cusServicePrice').innerText = `${serviceAmount.toFixed(2)} บาท`;
         document.getElementById('cusFoodPrice').innerText = `${foodAmount.toFixed(2)} บาท`;
 
+        // สร้างคิวอาร์โค้ด
         let pCode = generatePromptPayPayload(PROMPTPAY_ID, totalAmount);
         let qr = qrcode(0, 'M');
         qr.addData(pCode);
